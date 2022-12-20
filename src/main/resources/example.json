@@ -1,0 +1,27 @@
+{
+  "name": "asan",
+  "age": 32,
+  "married": true,
+  "birthday": "1992-02-08",
+  "salary": 1234.56,
+  "description": "a \"hudsom\" man",
+  "tags": [
+    "coder",
+    "mid-age"
+  ],
+  "location": {
+    "province": "福建省",
+    "city": "泉州市",
+    "area": "晋江市"
+  },
+  "family": [
+    {
+      "relation": "couple",
+      "name": "Helen"
+    },
+    {
+      "relation": "daughter",
+      "name": "XiaoMan"
+    }
+  ]
+}
