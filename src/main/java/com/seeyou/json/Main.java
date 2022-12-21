@@ -1,5 +1,7 @@
 package com.seeyou.json;
 
+import com.alibaba.fastjson.JSON;
+
 import java.io.InputStream;
 import java.util.List;
 
@@ -20,6 +22,8 @@ public class Main {
         JSONParser parser = new JSONParser();
         List<Token> tokens = parser.tokenizer(json);
         tokens = parser.tokenClean(tokens);
+        List<Ast> astItems = parser.generateAST();
+        Ast ast = astItems.get(0);
         System.out.println(String.format("|%-12s|%-12s|%-15s|", "type", "valueType", "value"));
         System.out.println("-------------------------------------------");
         for (Token t : tokens) {
@@ -29,5 +33,6 @@ public class Main {
                     t.getValue()));
         }
         System.out.println("-------------------------------------------");
+        System.out.println(JSON.toJSONString(ast,true));
     }
 }

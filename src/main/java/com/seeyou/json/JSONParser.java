@@ -103,6 +103,7 @@ public class JSONParser {
     /**
      * token清洗
      * 区分key和value的token
+     *
      * @param originTokens 原始token列表
      * @return 清洗过的token列表
      */
@@ -132,6 +133,61 @@ public class JSONParser {
             ++tokenIndex;
         }
         return jsonTokens;
+    }
+
+    /**
+     * 生成抽象语法树
+     *
+     * @return
+     */
+    public List<Ast> generateAST() {
+        List<Ast> items = new ArrayList<>();
+        //currentIndex作为当前读取token的位置
+        Token token = jsonTokens.get(currentIndex);
+        if ("object".equals(token.getType()) && "{".equals(token.getValue())) {
+            Ast item = new Ast();
+            item.setType(token.getType());
+            //如果json语法错误currentIndex有可能超过范围，这里先不考虑语法错误问题
+            Token tt = jsonTokens.get(++currentIndex);
+            while (!"object".equals(tt.getType()) || ("object".equals(tt.getType()) && !"}".equals(tt.getValue()))) {
+                item.getItems().addAll(generateAST());
+                tt = jsonTokens.get(currentIndex);
+            }
+            items.add(item);
+            ++currentIndex;
+        } else if ("array".equals(token.getType()) && "[".equals(token.getValue())) {
+            Ast item = new Ast();
+            item.setType(token.getType());
+            Token tt = jsonTokens.get(++currentIndex);
+            while (!"array".equals(tt.getType()) || ("array".equals(tt.getType()) && !"]".equals(tt.getValue()))) {
+                item.getItems().addAll(generateAST());
+                tt = jsonTokens.get(currentIndex);
+            }
+            items.add(item);
+            ++currentIndex;
+        } else if ("key".equals(token.getType())) {
+            Token value = jsonTokens.get(++currentIndex);
+            if ("object".equals(value.getType()) || "array".equals(value.getType())) {
+                List<Ast> tts = generateAST();
+                //如果是key-value结构必须设置key的名称
+                tts.get(0).setName((String) token.getValue());
+                return tts;
+            } else if ("value".equals(value.getType())) {
+                Ast item = new Ast();
+                item.setValue(value.getValue());
+                item.setType(value.getType());
+                item.setName((String) token.getValue());
+                items.add(item);
+                ++currentIndex;
+            }
+        } else if ("value".equals(token.getType())) {
+            Ast item = new Ast();
+            item.setValue(token.getValue());
+            item.setType(token.getType());
+            items.add(item);
+            ++currentIndex;
+        }
+        return items;
     }
 }
 
