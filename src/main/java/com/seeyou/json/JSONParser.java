@@ -118,16 +118,20 @@ public class JSONParser {
                     token.setType("key");
                     jsonTokens.add(token);
                     Token valueToken = originTokens.get(tokenIndex + 2);
+                    //object和array类型暂时不设置value类型
                     if (!"object".equals(valueToken.getType()) && !"array".equals(valueToken.getType())) {
                         valueToken.setType("value");
                     }
                     jsonTokens.add(valueToken);
+                    //因为读取了kvSymbol和value两个token因此要+2
                     tokenIndex += 2;
                 } else {
+                    //如果没有kvSymbol直接当作value进行处理
                     token.setType("value");
                     jsonTokens.add(token);
                 }
             } else {
+                //清洗目前只处理string类型其他类型忽略
                 jsonTokens.add(token);
             }
             ++tokenIndex;
