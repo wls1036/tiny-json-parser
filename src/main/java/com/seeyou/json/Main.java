@@ -19,6 +19,7 @@ public class Main {
         String json = new String(buf, "utf-8");
         JSONParser parser = new JSONParser();
         List<Token> tokens = parser.tokenizer(json);
+        tokens = parser.tokenClean(tokens);
         System.out.println(String.format("|%-12s|%-12s|%-15s|", "type", "valueType", "value"));
         System.out.println("-------------------------------------------");
         for (Token t : tokens) {

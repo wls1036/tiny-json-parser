@@ -14,6 +14,9 @@ public class JSONParser {
     //currentIndex保存当前字符串扫描的位置，字符串是逐字符进行扫描
     private int currentIndex = 0;
 
+    //清洗后的token
+    private List<Token> jsonTokens;
+
     /**
      * 对json字符串进行分词
      *
@@ -95,6 +98,34 @@ public class JSONParser {
         //将当前位置重置
         currentIndex = 0;
         return tokens;
+    }
+
+    public List<Token> tokenClean(List<Token> originTokens) {
+        jsonTokens = new ArrayList<>();
+        int tokenIndex = 0;
+        while (tokenIndex < originTokens.size()) {
+            Token token = originTokens.get(tokenIndex);
+            if ("string".equals(token.getType())) {
+                if (tokenIndex + 1 < originTokens.size() &&
+                        "kvSymbol".equals(originTokens.get(tokenIndex + 1).getType())) {
+                    token.setType("key");
+                    jsonTokens.add(token);
+                    Token valueToken = originTokens.get(tokenIndex + 2);
+                    if (!"object".equals(valueToken.getType()) && !"array".equals(valueToken.getType())) {
+                        valueToken.setType("value");
+                    }
+                    jsonTokens.add(valueToken);
+                    tokenIndex += 2;
+                } else {
+                    token.setType("value");
+                    jsonTokens.add(token);
+                }
+            } else {
+                jsonTokens.add(token);
+            }
+            ++tokenIndex;
+        }
+        return jsonTokens;
     }
 }
 
