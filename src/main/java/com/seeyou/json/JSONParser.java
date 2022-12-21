@@ -143,6 +143,7 @@ public class JSONParser {
     public List<Ast> generateAST() {
         List<Ast> items = new ArrayList<>();
         //currentIndex作为当前读取token的位置
+        //取出对象则currentIndex需要往前移动
         Token token = jsonTokens.get(currentIndex);
         if ("object".equals(token.getType()) && "{".equals(token.getValue())) {
             Ast item = new Ast();
@@ -166,8 +167,10 @@ public class JSONParser {
             items.add(item);
             ++currentIndex;
         } else if ("key".equals(token.getType())) {
+            // key和value是成对出现，如果只有key没有value说明json语法错误，这里暂时不考虑语法错误
             Token value = jsonTokens.get(++currentIndex);
             if ("object".equals(value.getType()) || "array".equals(value.getType())) {
+                //对象和数组需要递归获取语法树
                 List<Ast> tts = generateAST();
                 //如果是key-value结构必须设置key的名称
                 tts.get(0).setName((String) token.getValue());
@@ -181,6 +184,7 @@ public class JSONParser {
                 ++currentIndex;
             }
         } else if ("value".equals(token.getType())) {
+            //只有value没有key的情况，比如["1",2,true,null]
             Ast item = new Ast();
             item.setValue(token.getValue());
             item.setType(token.getType());
