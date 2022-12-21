@@ -100,6 +100,12 @@ public class JSONParser {
         return tokens;
     }
 
+    /**
+     * token清洗
+     * 区分key和value的token
+     * @param originTokens 原始token列表
+     * @return 清洗过的token列表
+     */
     public List<Token> tokenClean(List<Token> originTokens) {
         jsonTokens = new ArrayList<>();
         int tokenIndex = 0;
