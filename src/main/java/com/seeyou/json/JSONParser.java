@@ -1,7 +1,9 @@
 package com.seeyou.json;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Description:
@@ -143,6 +145,7 @@ public class JSONParser {
     public List<Ast> generateAST() {
         List<Ast> items = new ArrayList<>();
         //currentIndex作为当前读取token的位置
+        //取出对象则currentIndex需要往前移动
         Token token = jsonTokens.get(currentIndex);
         if ("object".equals(token.getType()) && "{".equals(token.getValue())) {
             Ast item = new Ast();
@@ -166,8 +169,10 @@ public class JSONParser {
             items.add(item);
             ++currentIndex;
         } else if ("key".equals(token.getType())) {
+            // key和value是成对出现，如果只有key没有value说明json语法错误，这里暂时不考虑语法错误
             Token value = jsonTokens.get(++currentIndex);
             if ("object".equals(value.getType()) || "array".equals(value.getType())) {
+                //对象和数组需要递归获取语法树
                 List<Ast> tts = generateAST();
                 //如果是key-value结构必须设置key的名称
                 tts.get(0).setName((String) token.getValue());
@@ -181,6 +186,7 @@ public class JSONParser {
                 ++currentIndex;
             }
         } else if ("value".equals(token.getType())) {
+            //只有value没有key的情况，比如["1",2,true,null]
             Ast item = new Ast();
             item.setValue(token.getValue());
             item.setType(token.getType());
@@ -188,6 +194,68 @@ public class JSONParser {
             ++currentIndex;
         }
         return items;
+    }
+
+    /**
+     * 将json生成java对象
+     *
+     * @param item
+     * @return
+     */
+    public Object generate(Ast item) {
+        if ("array".equals(item.getType())) {
+            //返回数组对象
+            return generateList(item);
+        } else if ("object".equals(item.getType())) {
+            //返回object对象
+            return generateObject(item);
+        } else if ("value".equals(item.getType())) {
+            //基本类型json对象，比如"100"也是一个json对象
+            return item.getValue();
+        }
+        return null;
+    }
+
+    /**
+     * 生成object对象
+     *
+     * @param astItem
+     * @return
+     */
+    public Map generateObject(Ast astItem) {
+        //object对象以Map形式返回
+        Map<String, Object> object = new HashMap<>();
+        for (Ast ast : astItem.getItems()) {
+            Object value = null;
+            if ("object".equals(ast.getType()) || "array".equals(ast.getType())) {
+                value = generate(ast);
+            } else if ("value".equals(ast.getType())) {
+                value = ast.getValue();
+            }
+            object.put(ast.getName(), value);
+        }
+        return object;
+    }
+
+    /**
+     * 生成object对象数组
+     *
+     * @param item
+     * @return
+     */
+    public List<Object> generateList(Ast item) {
+        //数组对象以List<Object>形式返回
+        List<Object> result = new ArrayList<>();
+        for (Ast child : item.getItems()) {
+            if ("object".equals(child.getType())) {
+                result.add(generateObject(child));
+            } else if ("value".equals(child.getType())) {
+                result.add(child.getValue());
+            } else if ("array".equals(child.getType())) {
+                result.add(generateList(child));
+            }
+        }
+        return result;
     }
 }
 
