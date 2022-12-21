@@ -12,7 +12,6 @@ import java.util.List;
  * @history: 1.2022/12/16 created by jianfeng.zheng
  */
 public class Main {
-
     public static void main(String[] args) throws Exception {
         InputStream fin = Main.class.getResourceAsStream("/example.json");
         byte[] buf = new byte[fin.available()];
@@ -33,6 +32,6 @@ public class Main {
                     t.getValue()));
         }
         System.out.println("-------------------------------------------");
-        System.out.println(JSON.toJSONString(ast,true));
+        System.out.println(JSON.toJSONString(ast, true));
     }
 }
